@@ -3,5 +3,5 @@
   NODE_VERSION = "18"
 
 [build]
-  command = "OUTPUT=netlify astro build"
+  command = "OUTPUT=netlify astro build && cp 6YPSrpYYgk.txt dist"
   publish = "dist"
