@@ -10,6 +10,6 @@ exports.handler = async (event, context) => {
     // 返回一个响应对象
     return {
       statusCode: 200,
-      body: JSON.stringify(data)
+      body: JSON.stringify("接到数据")
     };
   };
