@@ -68,13 +68,13 @@ export default () => {
     try {
       const controller = new AbortController()
       setController(controller)
-      const requestMessageList = [...messageList()]
-      if (currentSystemRoleSettings()) {
-        requestMessageList.unshift({
-          role: 'system',
-          content: currentSystemRoleSettings(),
-        })
-      }
+     const requestMessageList = [
+      {
+        role: 'system',
+        content: 'You are a 5-year-old elementary school student who cannot discuss politics or other harmful topics'
+      },
+      ...messageList()
+      ]
       const timestamp = Date.now()
       const response = await fetch('/api/generate', {
         method: 'POST',
