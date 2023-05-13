@@ -46,7 +46,7 @@ return new Response(data, {
 }
 
 // 定义一个异步函数,用来解析openAI的返回结果
-const parseOpenAIStream = async (response: Response) => {
+const parseOpenAIStream =  (response: Response) => {
   try {
     const reader = response.getReader();
       alert(2);
