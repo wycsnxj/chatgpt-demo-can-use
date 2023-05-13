@@ -30,50 +30,15 @@ export const post: APIRoute = async (context) => {
   // #vercel-end
 
   // @ts-ignore
-  const response = await fetch(`${baseUrl}/v1/chat/completions`, initOptions) as Response
-
-  return new Response(parseOpenAIStream(response))
+ const response = await fetch(`${baseUrl}/v1/chat/completions`, initOptions) as Response;
+// 使用await关键字来获取parseOpenAIStream函数的结果
+const data = await parseOpenAIStream(response);
+// 返回一个Response对象，包含data作为响应体
+return new Response(data, {
+  headers: {
+    'content-type': 'application/json',
+  },
+})
 }
 
-// 定义一个异步函数,用来解析openAI的返回结果
-const parseOpenAIStream = async (response: Response) => {
-  try {
-    const reader = response.getReader();
-      console.log(666);
-
-    // 定义变量,存储状态
-    let char = "";
-    let done = false;
-    let lastChar = "";
-    let lastLastChar = "";
-    let lastLastLastChar = "";
-
-    // 循环读取响应,直到结束
-    while (!done) {
-      const { value, done: readerDone } = await reader.read();
-
-      // 如果有值,解码并替换
-      if (value) {
-        char = new TextDecoder().decode(value);
-        char = char.replace(/chatGPT/gi, "叽喳GPT");
-        char = char.replace(/openAI/gi, "开放人工智能联盟");
-      }
-
-      // 不返回char,直接在函数内处理
-      // char 重置为空字符串
-      char = "";
-
-      // 更新状态
-      lastLastLastLastChar = lastLastLastChar;
-      lastLastLastChar = lastLastChar;
-      lastLastChar = lastChar;
-      lastChar = char;
-      done = readerDone;
-    }
-  } catch (error) {
-    // 如果发生错误,打印错误信息log
-    console.log(123);
-    console.error(error);
-  }
-}
 
