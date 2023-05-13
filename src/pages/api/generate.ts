@@ -35,6 +35,7 @@ const response = await fetch(`${baseUrl}/v1/chat/completions`, initOptions) as R
 // 使用await关键字来获取parseOpenAIStream函数的结果
 const data = await parseOpenAIStream(response);
 // 打印data
+alert(1);
 console.log(data);
 // 返回一个Response对象，包含data作为响应体
 return new Response(data, {
@@ -48,6 +49,7 @@ return new Response(data, {
 const parseOpenAIStream = async (response: Response) => {
   try {
     const reader = response.getReader();
+      alert(2);
       console.log(666);
 
     // 定义变量,存储状态
