@@ -30,15 +30,19 @@ export const post: APIRoute = async (context) => {
   // #vercel-end
 
   // @ts-ignore
- const response = await fetch(`${baseUrl}/v1/chat/completions`, initOptions) as Response;
+
+const response = await fetch(`${baseUrl}/v1/chat/completions`, initOptions) as Response;
 // 使用await关键字来获取parseOpenAIStream函数的结果
 const data = await parseOpenAIStream(response);
+// 打印data
+console.log(data);
 // 返回一个Response对象，包含data作为响应体
 return new Response(data, {
   headers: {
     'content-type': 'application/json',
   },
-})
+});
+
 }
 
 
