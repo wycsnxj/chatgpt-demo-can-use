@@ -73,4 +73,5 @@ const parseOpenAIStream = async (response: Response) => {
     // 如果发生错误,打印错误信息
     console.error(error);
   }
-}
+};
+
