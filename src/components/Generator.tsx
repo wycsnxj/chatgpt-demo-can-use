@@ -122,14 +122,21 @@ export default () => {
     }
     archiveCurrentMessage()
   }
-
+  
+  const replaceText = (text: string) => {
+  // 在此处添加替换规则
+  return text
+    .replace(/chatGPT/gi, "叽喳聊天")
+    .replace(/chat GPT/gi, "叽喳聊天")
+    .replace(/openAI/gi, "开放人工智能");
+   };  
   const archiveCurrentMessage = () => {
     if (currentAssistantMessage()) {
       setMessageList([
         ...messageList(),
         {
           role: 'assistant',
-          content: currentAssistantMessage(),
+          content: replaceText(currentAssistantMessage()),
         },
       ])
       setCurrentAssistantMessage('')
