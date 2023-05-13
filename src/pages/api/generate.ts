@@ -34,3 +34,45 @@ export const post: APIRoute = async (context) => {
 
   return new Response(parseOpenAIStream(response))
 }
+// 定义一个函数，用来解析openAI的返回结果
+const parseOpenAIStream = (response: Response) => {
+  // 定义一些变量，用来存储字符，状态，和上一次的字符
+  let char = ''
+  let done = false
+  let lastChar = ''
+  let lastLastChar = ''
+  let lastLastLastChar = ''
+  
+  // 循环读取响应的内容，直到结束
+  while (!done) {
+    const { value, done: readerDone } = await reader.read()
+    // 如果有值，就把它解码成字符
+    if (value) {
+      char += decoder.decode(value)
+      // 如果字符是换行符，并且上一个字符也是换行符，就跳过
+      if (char === '\n' && lastChar === '\n') {
+        continue
+      }
+      // 如果字符是换行符，并且上一个字符是三个或四个点号，就跳过
+      if (char === '\n' && lastChar === '.' && lastLastChar === '.' && lastLastLastChar === '.') {
+        continue
+      }
+      if (char === '\n' && lastChar === '.' && lastLastChar === '.' && lastLastLastChar === '.' && lastLastLastLastChar === '.') {
+        continue
+      }
+      // 把chatGPT替换成叽喳GPT
+      char = char.replace(/chatGPT/gi, '叽喳GPT')
+      // 把openAI替换成开放人工智能联盟
+      char = char.replace(/openAI/gi, '开放人工智能联盟')
+      // 返回字符
+      return char
+    }
+    // 更新状态和上一次的字符
+    done = readerDone
+    lastLastLastLastChar = lastLastLastChar
+    lastLastLastChar = lastLastChar
+    lastLastChar = lastChar
+    lastChar = char
+    char = ''
+  }
+}
