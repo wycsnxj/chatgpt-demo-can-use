@@ -37,6 +37,8 @@ export const post: APIRoute = async (context) => {
 
 // 定义一个函数，用来解析开放人工智能联盟的返回结果
 const parseOpenAIStream = (response: Response) => {
+  // 定义一个变量reader，用来获取响应的内容
+  const reader = response.body.getReader();
   // 定义一些变量，用来存储字符，状态，和上一次的字符
   let char = "";
   let done = false;
