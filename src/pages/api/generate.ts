@@ -39,6 +39,7 @@ export const post: APIRoute = async (context) => {
 const parseOpenAIStream = async (response: Response) => {
   try {
     const reader = response.getReader();
+      console.log(666);
 
     // 定义变量,存储状态
     let char = "";
@@ -70,8 +71,9 @@ const parseOpenAIStream = async (response: Response) => {
       done = readerDone;
     }
   } catch (error) {
-    // 如果发生错误,打印错误信息
+    // 如果发生错误,打印错误信息log
+    console.log(123);
     console.error(error);
   }
-};
+}
 
