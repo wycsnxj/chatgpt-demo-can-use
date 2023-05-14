@@ -108,7 +108,7 @@ export default () => {
             continue
           }
           if (char) {
-            setCurrentAssistantMessage(currentAssistantMessage() + char)
+            setCurrentAssistantMessage(currentAssistantMessage() + replaceText(char));
           }
           smoothToBottom()
         }
