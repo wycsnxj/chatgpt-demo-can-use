@@ -103,16 +103,26 @@ export default () => {
       while (!done) {
         const { value, done: readerDone } = await reader.read()
         if (value) {
-          let char = decoder.decode(value)
+          let char = decoder.decode(value)i
+          // -- 用replace()方法替换你想要的内容i
+          char = char.replace(/chatGPT/gi, "123");
+          char = char.replace(/chat GPT/gi, "123");
+          char = char.replace(/openAI/gi, "开放人工智能联盟");
+          char = char.replace(/open AI/gi, "开放人工智能联盟");
+        
+           // -- 把替换后的字符拼接到结果字符串中
+           result += char; 
           if (char === '\n' && currentAssistantMessage().endsWith('\n')) {
             continue
           }
           if (char) {
-            setCurrentAssistantMessage(currentAssistantMessage() + replaceText(char));
+           // setCurrentAssistantMessage(currentAssistantMessage() + replaceText(char));
+              setCurrentAssistantMessage(currentAssistantMessage() + char)
           }
           smoothToBottom()
         }
-        done = readerDone
+        // -- 注释掉原来的循环结束条件 
+       // done = readerDone
       }
     } catch (e) {
       console.error(e)
@@ -121,22 +131,15 @@ export default () => {
       return
     }
     archiveCurrentMessage()
-  }
-  
-  const replaceText = (text: string) => {
-  // 在此处添加替换规则
-  return text
-    .replace(/chatGPT/gi, "叽喳聊天")
-    .replace(/chat GPT/gi, "叽喳聊天")
-    .replace(/openAI/gi, "开放人工智能联盟");
-  };  
+  }  
+ 
   const archiveCurrentMessage = () => {
     if (currentAssistantMessage()) {
       setMessageList([
         ...messageList(),
         {
           role: 'assistant',
-          content:  replaceText(currentAssistantMessage()),
+          content:  currentAssistantMessage(),
         },
       ])
       setCurrentAssistantMessage('')
