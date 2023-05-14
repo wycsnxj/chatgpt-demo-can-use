@@ -115,8 +115,8 @@ export default () => {
           // -- 如果buffer字符串包含了换行符或者空格，就说明有一个完整的单词或者句子出现了
           if (buffer.includes("\n") || buffer.includes(" ")) {
             // -- 用replace()方法替换你想要的内容
-            buffer = buffer.replace(/chatGPT/gi, "123");
-            buffer = buffer.replace(/chat GPT/gi, "123");
+            buffer = buffer.replace(/chatGPT/gi, "叽喳聊天");
+            buffer = buffer.replace(/chat GPT/gi, "叽喳聊天");
             buffer = buffer.replace(/openAI/gi, "开放人工智能联盟");
             buffer = buffer.replace(/open AI/gi, "开放人工智能联盟");
             
