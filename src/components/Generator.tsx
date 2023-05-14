@@ -99,30 +99,41 @@ export default () => {
       const reader = data.getReader()
       const decoder = new TextDecoder('utf-8')
       let done = false
-
+      // -- 定义一个空buffer，用于存储替换后的结果字符串      
+      let buffer = "";
+      // -- 定义一个空字符串，用于存储拼接后的内容
+      let result = ""; 
       while (!done) {
         const { value, done: readerDone } = await reader.read()
         if (value) {
           let char = decoder.decode(value)
-          // -- 用replace()方法替换你想要的内容
-          char = char.replace(/chatGPT/gi, "123");
-          char = char.replace(/chat GPT/gi, "123");
-          char = char.replace(/openAI/gi, "开放人工智能联盟");
-          char = char.replace(/open AI/gi, "开放人工智能联盟");
-        
-           // -- 把替换后的字符拼接到结果字符串中
-           result += char; 
+
+          // -- 把字符拼接到buffer字符串中
+          buffer += char;
+          
+          // -- 如果buffer字符串包含了换行符或者空格，就说明有一个完整的单词或者句子出现了
+          if (buffer.includes("\n") || buffer.includes(" ")) {
+            // -- 用replace()方法替换你想要的内容
+            buffer = buffer.replace(/chatGPT/gi, "123");
+            buffer = buffer.replace(/chat GPT/gi, "123");
+            buffer = buffer.replace(/openAI/gi, "开放人工智能联盟");
+            buffer = buffer.replace(/open AI/gi, "开放人工智能联盟");
+            
+            // -- 把替换后的buffer字符串拼接到结果字符串中
+            result += buffer;           
+            buffer = "";
+          }
           if (char === '\n' && currentAssistantMessage().endsWith('\n')) {
             continue
           }
           if (char) {
-           // setCurrentAssistantMessage(currentAssistantMessage() + replaceText(char));
               setCurrentAssistantMessage(currentAssistantMessage() + char)
           }
           smoothToBottom()
         }
         // -- 注释掉原来的循环结束条件 
        // done = readerDone
+       setCurrentAssistantMessage(result);
       }
     } catch (e) {
       console.error(e)
