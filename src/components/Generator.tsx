@@ -120,7 +120,7 @@ export default () => {
             buffer = buffer.replace(/openAI/gi, "开放人工智能联盟");
             buffer = buffer.replace(/open AI/gi, "开放人工智能联盟");
             
-            // -- 把替换后的buffer字符串拼接到结果字符串中
+            // -- 把替换后的buffer字符串拼接到结果字符串
             result += buffer;           
             buffer = "";
           }
