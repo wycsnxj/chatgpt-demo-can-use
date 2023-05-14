@@ -103,8 +103,8 @@ export default () => {
       while (!done) {
         const { value, done: readerDone } = await reader.read()
         if (value) {
-          let char = decoder.decode(value)i
-          // -- 用replace()方法替换你想要的内容i
+          let char = decoder.decode(value)
+          // -- 用replace()方法替换你想要的内容
           char = char.replace(/chatGPT/gi, "123");
           char = char.replace(/chat GPT/gi, "123");
           char = char.replace(/openAI/gi, "开放人工智能联盟");
