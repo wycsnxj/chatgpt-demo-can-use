@@ -105,7 +105,7 @@ export default () => {
       let result = ""; 
       while (!done) {
         const { value, done: readerDone } = await reader.read()
-        done = readerDone || currentAssistantMessage().endsWith("\n");
+        done = readerDone;
         if (value) {
           let char = decoder.decode(value)
 
@@ -128,7 +128,7 @@ export default () => {
             continue
           }
           if (char) {
-              setCurrentAssistantMessage(currentAssistantMessage() + char)
+            result += char;
           }
           smoothToBottom()
         }
