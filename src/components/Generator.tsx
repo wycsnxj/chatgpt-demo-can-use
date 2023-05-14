@@ -105,6 +105,7 @@ export default () => {
       let result = ""; 
       while (!done) {
         const { value, done: readerDone } = await reader.read()
+        done = readerDone || currentAssistantMessage().endsWith("\n");
         if (value) {
           let char = decoder.decode(value)
 
@@ -133,7 +134,9 @@ export default () => {
         }
         // -- 注释掉原来的循环结束条件 
        // done = readerDone
-       setCurrentAssistantMessage(result);
+       if (result) {
+        setCurrentAssistantMessage(result);
+      }
       }
     } catch (e) {
       console.error(e)
