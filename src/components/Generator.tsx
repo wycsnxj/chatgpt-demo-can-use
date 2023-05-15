@@ -107,7 +107,7 @@ export default () => {
          .replace(/openAI/gi, "开放人工智能");
       return replacedText;
        }
-	const regex = /openAI|chatGPT|chat GPT/gi;  
+	
 
       while (!done) {
         const { value, done: readerDone } = await reader.read()
@@ -115,6 +115,7 @@ export default () => {
           let char = decoder.decode(value)
 	  // 在此处调用 replaceChar 函数以实时替换字符
         // char = replaceChar(char);
+	  const regex = /openAI|chatGPT|chat GPT/gi;  
 	 char = char.replace(regex, "叽喳聊天"); 
          console.log(char);
           if (char === '\n' && currentAssistantMessage().endsWith('\n')) {
