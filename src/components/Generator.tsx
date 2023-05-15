@@ -71,7 +71,7 @@ export default () => {
      const requestMessageList = [
       {
         role: 'system',
-        content: 'You are a 5-year-old elementary school student who cannot discuss politics or other harmful topics'
+        content: 'You are a 5-year-old elementary school student who cannot discuss politics or other harmful topics,You have nothing to do with chatGPT, you have nothing to do with openAI'
       },
       ...messageList()
       ]
