@@ -99,52 +99,31 @@ export default () => {
       const reader = data.getReader()
       const decoder = new TextDecoder('utf-8')
       let done = false
-      // -- 定义一个空buffer，用于存储替换后的结果字符串      
-      let buffer = "";
-      // -- 定义一个空字符串，用于存储拼接后的内容
-      let result = ""; 
+      const replaceChar = (char: string) => {
+      // 在此处添加替换规则
+      const replacedText = char
+         .replace(/chatGPT/gi, "叽喳聊天")
+         .replace(/chat GPT/gi, "叽喳聊天")
+         .replace(/openAI/gi, "开放人工智能");
+      return replacedText;
+       }
+
       while (!done) {
         const { value, done: readerDone } = await reader.read()
-        done = readerDone;
         if (value) {
           let char = decoder.decode(value)
-
-          // -- 把字符拼接到buffer字符串中
-          buffer += char;
-          
-          // -- 如果buffer字符串包含了换行符或者空格，就说明有一个完整的单词或者句子出现了
-          if (buffer.includes("\n") || buffer.includes(" ")) {
-            // -- 用replace()方法替换你想要的内容
-            buffer = buffer.replace(/chatGPT|chat GPT|openAI|open AI/gi, (match) => {
-              switch (match) {
-                case "chatGPT":
-                case "chat GPT":
-                  return "123";
-                case "openAI":
-                case "open AI":
-                  return "开放人工智能联盟";
-                default:
-                  return match;
-              }
-            });
-            
-            // -- 把替换后的buffer字符串拼接到结果字符串
-            result += buffer;           
-            buffer = "";
-          }
+	  // 在此处调用 replaceChar 函数以实时替换字符
+         char = replaceChar(char);
+         console.log(char);
           if (char === '\n' && currentAssistantMessage().endsWith('\n')) {
             continue
           }
           if (char) {
-            result += char;
+            setCurrentAssistantMessage(currentAssistantMessage() + char)
           }
           smoothToBottom()
         }
-        // -- 注释掉原来的循环结束条件 
-       // done = readerDone
-       if (result) {
-        setCurrentAssistantMessage(result);
-      }
+        done = readerDone
       }
     } catch (e) {
       console.error(e)
@@ -153,15 +132,15 @@ export default () => {
       return
     }
     archiveCurrentMessage()
-  }  
- 
+  }
+  
   const archiveCurrentMessage = () => {
     if (currentAssistantMessage()) {
       setMessageList([
         ...messageList(),
         {
           role: 'assistant',
-          content:  currentAssistantMessage(),
+          content: currentAssistantMessage(),
         },
       ])
       setCurrentAssistantMessage('')
