@@ -103,6 +103,7 @@ export default () => {
         const { value, done: readerDone } = await reader.read()
         if (value) {
           let char = decoder.decode(value)
+	   setTimeout(() => {}, 100)
 	  // 在此处调用 replaceChar 函数以实时替换字符
 	  const regex = /openAI|open AI|chatGPT|chat GPT/gi; 
 	  char = char.replace(regex, "叽喳聊天"); 
