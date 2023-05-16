@@ -99,24 +99,22 @@ export default () => {
       const reader = data.getReader()
       const decoder = new TextDecoder('utf-8')
       let done = false
-      const replaceChar = (char: string) => {
-      // 在此处添加替换规则
-      const replacedText = char
-         .replace(/chatGPT/gi, "叽喳聊天")
-         .replace(/chat GPT/gi, "叽喳聊天")
-         .replace(/openAI/gi, "开放人工智能");
-      return replacedText;
-       }
-	
-
       while (!done) {
         const { value, done: readerDone } = await reader.read()
         if (value) {
           let char = decoder.decode(value)
 	  // 在此处调用 replaceChar 函数以实时替换字符
-        // char = replaceChar(char);
-	  const regex = /openAI|chatGPT|chat GPT/gi;  
-	 char = char.replace(regex, "叽喳聊天"); 
+	   const replaceChar = (char: string) => {
+	      // 在此处添加替换规则
+	      const replacedText = char
+		 .replace(/chatGPT/gi, "叽喳聊天")
+		 .replace(/chat GPT/gi, "叽喳聊天")
+		 .replace(/openAI/gi, "开放人工智能");
+	      return replacedText;
+	       }
+           char = replaceChar(char);
+	 //const regex = /openAI|chatGPT|chat GPT/gi;  
+	 //char = char.replace(regex, "叽喳聊天"); 
          console.log(char);
           if (char === '\n' && currentAssistantMessage().endsWith('\n')) {
             continue
