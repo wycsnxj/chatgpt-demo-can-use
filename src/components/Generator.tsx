@@ -104,8 +104,8 @@ export default () => {
         if (value) {
           let char = decoder.decode(value)
 	  // 在此处调用 replaceChar 函数以实时替换字符
-	  const regex1 = /\b(openAI|openai|open AI)\b/gi;
-          const regex2 = /\b(chatGPT|chat GPT|chat gpt)\b/gi;
+	  const regex1 = /openAI|openai|open AI/gi;
+          const regex2 = /chatGPT|chat GPT|chat gpt/gi;
           char = char.replace(regex1, "开放人工智能联盟").replace(regex2, "叽喳聊天");
          console.log(char);
           if (char === '\n' && currentAssistantMessage().endsWith('\n')) {
