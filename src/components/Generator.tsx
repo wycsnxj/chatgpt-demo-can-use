@@ -5,9 +5,9 @@ import MessageItem from './MessageItem'
 import SystemRoleSettings from './SystemRoleSettings'
 import { generateSignature } from '@/utils/auth'
 import { useThrottleFn } from 'solidjs-use'
-import EventSource from 'eventsource';
+//import EventSource from 'eventsource';
 // 引入 eventsource 模块
-//const EventSource = require('eventsource');
+const EventSource = require('eventsource');
 
 export default () => {
   let inputRef: HTMLTextAreaElement;
