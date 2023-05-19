@@ -6,9 +6,6 @@ import SystemRoleSettings from './SystemRoleSettings'
 import { generateSignature } from '@/utils/auth'
 import { useThrottleFn } from 'solidjs-use'
 
-// ****** 引入eventsource模块来处理SSE
-import EventSource from 'eventsource';
-
 export default () => {
   let inputRef: HTMLTextAreaElement
   const [currentSystemRoleSettings, setCurrentSystemRoleSettings] = createSignal('')
@@ -16,6 +13,8 @@ export default () => {
   const [messageList, setMessageList] = createSignal<ChatMessage[]>([])
   const [currentAssistantMessage, setCurrentAssistantMessage] = createSignal('')
   const [loading, setLoading] = createSignal(false)
+  const [controller, setController] = createSignal<AbortController>(null)
+
 
   onMount(() => {
     try {
@@ -28,7 +27,7 @@ export default () => {
     } catch (err) {
       console.error(err)
     }
-
+    
     window.addEventListener('beforeunload', handleBeforeUnload)
     onCleanup(() => {
       window.removeEventListener('beforeunload', handleBeforeUnload)
@@ -62,38 +61,24 @@ export default () => {
     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
   }, 300, false, true)
 
-  // 定义一个replaceChar函数，接受一个字符作为参数，返回替换后的字符
-  const replaceChar = (char) => {
-    // 定义一个正则表达式，匹配openAI, open AI, chatGPT, chat GPT等字样
-    const regex = /openAI|open AI|chatGPT|chat GPT/gi; 
-    // 使用replace方法，将匹配到的字样替换为叽喳聊天
-    char = char.replace(regex, "叽喳聊天"); 
-    // 返回替换后的字符
-    return char;
-  }
-
   const requestWithLatestMessage = async () => {
     setLoading(true)
     setCurrentAssistantMessage('')
     const storagePassword = localStorage.getItem('pass')
     try {
-      // 判断是否有网络连接
-      if (9>11) {
-        // 有网络连接，发送请求
-        const requestMessageList = [
-          {
-            role: 'system',
-            content: 'You are a 5-year-old elementary school student who cannot discuss politics or other harmful topics'
-          },
-          ...messageList()
-        ]
-        const timestamp = Date.now()
-        
-        // 定义一个url变量，存储请求的地址
-        const url = '/api/generate';
-
-        // 定义一个data变量，存储请求的数据
-        const data = JSON.stringify({
+      const controller = new AbortController()
+      setController(controller)
+      const requestMessageList = [...messageList()]
+      if (currentSystemRoleSettings()) {
+        requestMessageList.unshift({
+          role: 'system',
+          content: currentSystemRoleSettings(),
+        })
+      }
+      const timestamp = Date.now()
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        body: JSON.stringify({
           messages: requestMessageList,
           time: timestamp,
           pass: storagePassword,
@@ -101,42 +86,38 @@ export default () => {
             t: timestamp,
             m: requestMessageList?.[requestMessageList.length - 1]?.content || '',
           }),
-        });
+        }),
+        signal: controller.signal,
+      })
+      if (!response.ok) {
+        throw new Error(response.statusText)
+      }
+      const data = response.body
+      if (!data) {
+        throw new Error('No data')
+      }
+      const reader = data.getReader()
+      const decoder = new TextDecoder('utf-8')
+      let done = false
 
-        // 创建一个EventSource对象，传入url和data作为参数
-        const eventSource = new EventSource(url, { data });
-
-        // 监听message事件，当收到流中的数据时触发
-        eventSource.addEventListener('message', (event) => {
-          // 获取流中的数据，并转换为字符串
-          const message = event.data.toString();
-          // 如果收到 [DONE] 消息，表示流结束，关闭EventSource对象
-          if          (message === ' [DONE]') {
-            eventSource.close();
-            return;
+      while (!done) {
+        const { value, done: readerDone } = await reader.read()
+        if (value) {
+          let char = decoder.decode(value)
+          if (char === '\n' && currentAssistantMessage().endsWith('\n')) {
+            continue
           }
-          // 尝试将消息解析为JSON对象，并获取text属性
-          try {
-            const parsed = JSON.parse(message);
-            let { text } = parsed.choices[0];
-            // 在此处调用 replaceChar 函数以实时替换字符
-             text = replaceChar(text);
-            // 将text追加到当前助理消息中，并显示在界面上
-            setCurrentAssistantMessage(currentAssistantMessage() + text);
-            smoothToBottom();
-          } catch (error) {
-            console.error('Could not JSON parse stream message', message, error);
+          if (char) {
+            setCurrentAssistantMessage(currentAssistantMessage() + char)
           }
-        });
-
-        // 监听error事件，当发生错误时触发
-        eventSource.addEventListener('error', (error) => {
-          console.error('An error occurred during OpenAI request', error);
-        });
-      } 
+          smoothToBottom()
+        }
+        done = readerDone
+      }
     } catch (e) {
       console.error(e)
       setLoading(false)
+      setController(null)
       return
     }
     archiveCurrentMessage()
@@ -153,7 +134,8 @@ export default () => {
       ])
       setCurrentAssistantMessage('')
       setLoading(false)
-      inputRef.focus()      
+      setController(null)
+      inputRef.focus()
     }
   }
 
@@ -165,64 +147,90 @@ export default () => {
     setCurrentSystemRoleSettings('')
   }
 
+  const stopStreamFetch = () => {
+    if (controller()) {
+      controller().abort()
+      archiveCurrentMessage()
+    }
+  }
+
+  const retryLastFetch = () => {
+    if (messageList().length > 0) {
+      const lastMessage = messageList()[messageList().length - 1]
+      console.log(lastMessage)
+      if (lastMessage.role === 'assistant') {
+        setMessageList(messageList().slice(0, -1))
+        requestWithLatestMessage()
+      }
+    }
+  }
+
+  const handleKeydown = (e: KeyboardEvent) => {
+    if (e.isComposing || e.shiftKey) {
+      return
+    }
+    if (e.key === 'Enter') {
+      handleButtonClick()
+    }
+  }
+
   return (
     <div my-6>
-    <SystemRoleSettings
-    canEdit={() => messageList().length === 0}
-    systemRoleEditing={systemRoleEditing}
-    setSystemRoleEditing={setSystemRoleEditing}
-    currentSystemRoleSettings={currentSystemRoleSettings}
-    setCurrentSystemRoleSettings={setCurrentSystemRoleSettings}
-    />
-    <Index each={messageList()}>
-    {(message, index) => (
-    <MessageItem
-    role={message().role}
-    message={message().content}
-    showRetry={() => (message().role === 'assistant' && index === messageList().length - 1)}
-    onRetry={retryLastFetch}
-    />
-    )}
-    </Index>
-    {currentAssistantMessage() && (
-    <MessageItem
-    role="assistant"
-    message={currentAssistantMessage}
-    />
-    )}
-    <Show
-    when={!loading()}
-    fallback={() => (
-    <div class="gen-cb-wrapper">
-    <span>AI is thinking...</span>
-    <div class="gen-cb-stop" onClick={stopStreamFetch}>Stop</div>
+      <SystemRoleSettings
+        canEdit={() => messageList().length === 0}
+        systemRoleEditing={systemRoleEditing}
+        setSystemRoleEditing={setSystemRoleEditing}
+        currentSystemRoleSettings={currentSystemRoleSettings}
+        setCurrentSystemRoleSettings={setCurrentSystemRoleSettings}
+      />
+      <Index each={messageList()}>
+        {(message, index) => (
+          <MessageItem
+            role={message().role}
+            message={message().content}
+            showRetry={() => (message().role === 'assistant' && index === messageList().length - 1)}
+            onRetry={retryLastFetch}
+          />
+        )}
+      </Index>
+      {currentAssistantMessage() && (
+        <MessageItem
+          role="assistant"
+          message={currentAssistantMessage}
+        />
+      )}
+      <Show
+        when={!loading()}
+        fallback={() => (
+          <div class="gen-cb-wrapper">
+            <span>AI is thinking...</span>
+            <div class="gen-cb-stop" onClick={stopStreamFetch}>Stop</div>
+          </div>
+        )}
+      >
+        <div class="gen-text-wrapper" class:op-50={systemRoleEditing()}>
+          <textarea
+            ref={inputRef!}
+            disabled={systemRoleEditing()}
+            onKeyDown={handleKeydown}
+            placeholder="Enter something..."
+            autocomplete="off"
+            autofocus
+            onInput={() => {
+              inputRef.style.height = 'auto';
+              inputRef.style.height = inputRef.scrollHeight + 'px';
+            }}
+            rows="1"
+            class='gen-textarea'
+          />
+          <button onClick={handleButtonClick} disabled={systemRoleEditing()} gen-slate-btn>
+            发送
+          </button>
+          <button title="Clear" onClick={clear} disabled={systemRoleEditing()} gen-slate-btn>
+            <IconClear />
+          </button>
+        </div>
+      </Show>
     </div>
-    )}
-    >
-    <div class="gen-text-wrapper" class:op-50={systemRoleEditing()}>
-    <textarea
-    ref={inputRef!}
-    disabled={systemRoleEditing()}
-    onKeyDown={handleKeydown}
-    placeholder="Enter something..."
-    autocomplete="off"
-    autofocus
-    onInput={() => {
-    inputRef.style.height = 'auto';
-    inputRef.style.height = inputRef.scrollHeight + 'px';
-    }}
-    rows="1"
-    class='gen-textarea'
-    />
-    <button onClick={handleButtonClick} disabled={systemRoleEditing()} gen-slate-btn>
-    Send
-    </button>
-    <button title="Clear" onClick={clear} disabled={systemRoleEditing()} gen-slate-btn>
-    <IconClear />
-    </button>
-    </div>
-    </Show>
-    </div>
-    )
+  )
 }
-
