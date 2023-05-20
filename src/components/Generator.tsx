@@ -5,7 +5,6 @@ import MessageItem from './MessageItem'
 import SystemRoleSettings from './SystemRoleSettings'
 import { generateSignature } from '@/utils/auth'
 import { useThrottleFn } from 'solidjs-use'
-import replaceStream from "replacestream"; // *********** 引入replacestream模块
 
 export default () => {
   let inputRef: HTMLTextAreaElement
@@ -77,7 +76,6 @@ export default () => {
         })
       }
       const timestamp = Date.now()
-      // *********** 修改以下代码
       const response = await fetch('/api/generate', {
         method: 'POST',
         body: JSON.stringify({
@@ -98,20 +96,33 @@ export default () => {
       if (!data) {
         throw new Error('No data')
       }
+      const reader = data.getReader()
+      const decoder = new TextDecoder('utf-8')
+      let done = false
+      const replaceSensitiveWords = (text: string) => {
+        // 在此处添加替换规则
+        return text
+          .replace(/chatGPT/gi, "叽喳聊天")
+          .replace(/chat GPT/gi, "叽喳聊天")
+          .replace(/openAI/gi, "开放人工智能");
+      };
 
-      // 创建一个替换流，用于把"George"替换成"Bob"
-      const rs = replaceStream("George", "Bob");
-
-      // 把数据流连接到替换流，然后连接到一个函数来处理结果
-      data.pipe(rs).pipe((err, result) => {
-        if (err) {
-          console.error(err);
-        } else {
-          setOutput(result); // 把结果设置为输出
+      while (!done) {
+        const { value, done: readerDone } = await reader.read()
+        if (value) {
+          let char = decoder.decode(value)
+          if (char === '\n' && currentAssistantMessage().endsWith('\n')) {
+            continue
+          }
+          if (char) {
+            // 对返回的字符进行敏感词汇替换
+          //  char = replaceSensitiveWords(char);
+            setCurrentAssistantMessage(currentAssistantMessage() + char)
+          }
+          smoothToBottom()
         }
-      });
-      
-      // *********** 修改以上代码
+        done = readerDone
+      }
     } catch (e) {
       console.error(e)
       setLoading(false)
