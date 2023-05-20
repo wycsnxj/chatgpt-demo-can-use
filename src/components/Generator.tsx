@@ -116,7 +116,7 @@ export default () => {
           }
           if (char) {
             // 对返回的字符进行敏感词汇替换
-          //  char = replaceSensitiveWords(char);
+            char = replaceSensitiveWords(char);
             setCurrentAssistantMessage(currentAssistantMessage() + char)
           }
           smoothToBottom()
