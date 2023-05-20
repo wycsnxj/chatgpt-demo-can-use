@@ -99,14 +99,6 @@ export default () => {
       const reader = data.getReader()
       const decoder = new TextDecoder('utf-8')
       let done = false
-      const replaceSensitiveWords = (text: string) => {
-        // 在此处添加替换规则
-        return text
-          .replace(/chatGPT/gi, "叽喳聊天")
-          .replace(/chat GPT/gi, "叽喳聊天")
-          .replace(/openAI/gi, "开放人工智能");
-      };
-
       while (!done) {
         const { value, done: readerDone } = await reader.read()
         if (value) {
@@ -114,6 +106,13 @@ export default () => {
           if (char === '\n' && currentAssistantMessage().endsWith('\n')) {
             continue
           }
+          const replaceSensitiveWords = (text: string) => {
+        // 在此处添加替换规则
+        return text
+          .replace(/chatGPT/gi, "叽喳聊天")
+          .replace(/chat GPT/gi, "叽喳聊天")
+          .replace(/openAI/gi, "开放人工智能");
+      };
           if (char) {
             // 对返回的字符进行敏感词汇替换
             char = replaceSensitiveWords(char);
