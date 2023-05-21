@@ -107,17 +107,27 @@ export default () => {
             continue
           }
           const replaceSensitiveWords = (text: string) => {
-        // 在此处添加替换规则
-        return text
-          .replace(/chatGPT/gi, "叽喳聊天")
-          .replace(/chat GPT/gi, "叽喳聊天")
-          .replace(/openAI/gi, "开放人工智能");
-      };
+            const replaceSensitiveWords = (char: string, buffer: string) => {
+              const sensitiveWordsMap = [
+                { regex: /chatGPT/gi, replacement: "叽喳聊天" },
+                { regex: /chat GPT/gi, replacement: "叽喳聊天" },
+                { regex: /openAI/gi, replacement: "开放人工智能" },
+              ];
+            
+              let newText = buffer + char;
+            
+              sensitiveWordsMap.forEach(({ regex, replacement }) => {
+                newText = newText.replace(regex, replacement);
+              });
+            
+              return newText.slice(buffer.length);
+            };
           if (char) {
             // 对返回的字符进行敏感词汇替换
             console.log('------'+char);
-            char = replaceSensitiveWords(char);
-            setCurrentAssistantMessage(currentAssistantMessage() + char)
+             // 对返回的字符进行敏感词汇替换
+      const replacedChar = replaceSensitiveWords(char, currentAssistantMessage());
+      setCurrentAssistantMessage(currentAssistantMessage() + replacedChar);
           }
           smoothToBottom()
         }
