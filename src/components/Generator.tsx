@@ -7,136 +7,114 @@ import { generateSignature } from '@/utils/auth'
 import { useThrottleFn } from 'solidjs-use'
 
 export default () => {
- let inputRef: HTMLTextAreaElement
- const [currentSystemRoleSettings, setCurrentSystemRoleSettings] = createSignal('')
- const [systemRoleEditing, setSystemRoleEditing] = createSignal(false)
- const [messageList, setMessageList] = createSignal<ChatMessage[]>([])
- const [currentAssistantMessage, setCurrentAssistantMessage] = createSignal('')
- const [loading, setLoading] = createSignal(false)
- const [controller, setController] = createSignal<AbortController>(null)
+  let inputRef: HTMLTextAreaElement
+  const [currentSystemRoleSettings, setCurrentSystemRoleSettings] = createSignal('')
+  const [systemRoleEditing, setSystemRoleEditing] = createSignal(false)
+  const [messageList, setMessageList] = createSignal<ChatMessage[]>([])
+  const [currentAssistantMessage, setCurrentAssistantMessage] = createSignal('')
+  const [loading, setLoading] = createSignal(false)
+  const [controller, setController] = createSignal<AbortController>(null)
 
 
- onMount(() => {
- try {
- if (localStorage.getItem('messageList')) {
- setMessageList(JSON.parse(localStorage.getItem('messageList')))
- }
- if (localStorage.getItem('systemRoleSettings')) {
- setCurrentSystemRoleSettings(localStorage.getItem('systemRoleSettings'))
- }
- } catch (err) {
- console.error(err)
- }
- 
- window.addEventListener('beforeunload', handleBeforeUnload)
- onCleanup(() => {
- window.removeEventListener('beforeunload', handleBeforeUnload)
- })
- })
-
- const handleBeforeUnload = () => {
- localStorage.setItem('messageList', JSON.stringify(messageList()))
- localStorage.setItem('systemRoleSettings', currentSystemRoleSettings())
- }
-
- const handleButtonClick = async () => {
- const inputValue = inputRef.value
- if (!inputValue) {
- return
- }
- // @ts-ignore
- if (window?.umami) umami.trackEvent('chat_generate')
- inputRef.value = ''
- setMessageList([
- ...messageList(),
- {
- role: 'user',
- content: inputValue,
- },
- ])
- requestWithLatestMessage()
- }
-
- const smoothToBottom = useThrottleFn(() => {
- window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
- }, 300, false, true)
-
- const requestWithLatestMessage = async () => {
-  setLoading(true)
-  setCurrentAssistantMessage('')
-  const storagePassword = localStorage.getItem('pass')
-  try {
-    const controller = new AbortController()
-    setController(controller)
-    const requestMessageList = [...messageList()]
-    if (currentSystemRoleSettings()) {
-      requestMessageList.unshift({
-        role: 'system',
-        content: currentSystemRoleSettings(),
-      })
+  onMount(() => {
+    try {
+      if (localStorage.getItem('messageList')) {
+        setMessageList(JSON.parse(localStorage.getItem('messageList')))
+      }
+      if (localStorage.getItem('systemRoleSettings')) {
+        setCurrentSystemRoleSettings(localStorage.getItem('systemRoleSettings'))
+      }
+    } catch (err) {
+      console.error(err)
     }
-    const timestamp = Date.now()
-    const response = await fetch('/api/generate', {
-      method: 'POST',
-      body: JSON.stringify({
-        messages: requestMessageList,
-        time: timestamp,
-        pass: storagePassword,
-        sign: await generateSignature({
-          t: timestamp,
-          m: requestMessageList?.[requestMessageList.length - 1]?.content || '',
-        }),
-      }),
-      signal: controller.signal,
+    
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    onCleanup(() => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
     })
-    if (!response.ok) {
-      throw new Error(response.statusText)
+  })
+
+  const handleBeforeUnload = () => {
+    localStorage.setItem('messageList', JSON.stringify(messageList()))
+    localStorage.setItem('systemRoleSettings', currentSystemRoleSettings())
+  }
+
+  const handleButtonClick = async () => {
+    const inputValue = inputRef.value
+    if (!inputValue) {
+      return
     }
-    const data = response.body
-    if (!data) {
-      throw new Error('No data')
-    }
-    const reader = data.getReader()
-    const decoder = new TextDecoder('utf-8')
-    let done = false
-    while (!done) {
-      const { value, done: readerDone } = await reader.read()
-      if (value) {
-        let char = decoder.decode(value)
-        if (char === '\n' && currentAssistantMessage().endsWith('\n')) {
-          continue
-        }
-        const replaceSensitiveWords = (text: string) => {
-          // 修改了函数名
-          const replaceSensitiveChar = (char: string, buffer: string) => {
-            const sensitiveWordsMap = [
-              { regex: /chatGPT/gi, replacement: "叽喳聊天" },
-              { regex: /chat GPT/gi, replacement: "叽喳聊天" },
-              { regex: /openAI/gi, replacement: "开放人工智能" },
-            ];
-            
-            let newText = buffer + char;
-            
-            sensitiveWordsMap.forEach(({ regex, replacement }) => {
-              newText = newText.replace(regex, replacement);
-            });
-            
-            return newText.slice(buffer.length);
-          };
-          
+    // @ts-ignore
+    if (window?.umami) umami.trackEvent('chat_generate')
+    inputRef.value = ''
+    setMessageList([
+      ...messageList(),
+      {
+        role: 'user',
+        content: inputValue,
+      },
+    ])
+    requestWithLatestMessage()
+  }
+
+  const smoothToBottom = useThrottleFn(() => {
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+  }, 300, false, true)
+
+  const requestWithLatestMessage = async () => {
+    setLoading(true)
+    setCurrentAssistantMessage('')
+    const storagePassword = localStorage.getItem('pass')
+    try {
+      const controller = new AbortController()
+      setController(controller)
+      const requestMessageList = [...messageList()]
+      if (currentSystemRoleSettings()) {
+        requestMessageList.unshift({
+          role: 'system',
+          content: currentSystemRoleSettings(),
+        })
+      }
+      const timestamp = Date.now()
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        body: JSON.stringify({
+          messages: requestMessageList,
+          time: timestamp,
+          pass: storagePassword,
+          sign: await generateSignature({
+            t: timestamp,
+            m: requestMessageList?.[requestMessageList.length - 1]?.content || '',
+          }),
+        }),
+        signal: controller.signal,
+      })
+      if (!response.ok) {
+        throw new Error(response.statusText)
+      }
+      const data = response.body
+      if (!data) {
+        throw new Error('No data')
+      }
+      const reader = data.getReader()
+      const decoder = new TextDecoder('utf-8')
+      let done = false
+
+      while (!done) {
+        const { value, done: readerDone } = await reader.read()
+        if (value) {
+          let char = decoder.decode(value)
+          if (char === '\n' && currentAssistantMessage().endsWith('\n')) {
+            continue
+          }
           if (char) {
-            // 对返回的字符进行敏感词汇替换
-            console.log('------'+char);
-            // 对返回的字符进行敏感词汇替换
-            // 调用了修改后的函数名
-            const replacedChar = replaceSensitiveChar(char, currentAssistantMessage());
-            setCurrentAssistantMessage(currentAssistantMessage() + replacedChar);
+            setCurrentAssistantMessage(currentAssistantMessage() + char)
           }
           smoothToBottom()
         }
         done = readerDone
-      }}
- } catch (e) { // 这里缺少了一个左花括号，应该是 catch (e) { 
+      }
+    } catch (e) {
       console.error(e)
       setLoading(false)
       setController(null)
@@ -246,7 +224,7 @@ export default () => {
             class='gen-textarea'
           />
           <button onClick={handleButtonClick} disabled={systemRoleEditing()} gen-slate-btn>
-            发送
+            Send
           </button>
           <button title="Clear" onClick={clear} disabled={systemRoleEditing()} gen-slate-btn>
             <IconClear />
