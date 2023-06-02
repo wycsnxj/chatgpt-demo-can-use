@@ -25,7 +25,7 @@ A demo repo based on [OpenAI GPT-3.5 Turbo API.](https://platform.openai.com/doc
    ```
 3. **OPENAI_API_KEY**: Before running this application, you need to obtain the API key from OpenAI. You can register the API key at [https://beta.openai.com/signup](https://beta.openai.com/signup).
 
-### Getting Started
+### Getting Started.
 
 1. Install dependencies
    ```bash

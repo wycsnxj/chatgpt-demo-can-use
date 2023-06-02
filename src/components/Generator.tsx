@@ -97,11 +97,11 @@ export default () => {
  try {
  const controller = new AbortController()
  setController(controller)
- const ruleSetting = import.meta.env.RULE_SETTING
+ const ruleSetting =  import.meta.env.RULE_SETTING
  const requestMessageList = [
   {
     role: 'system',
-    content: ruleSetting
+    content: ruleSetting,
   },
   ...messageList()
   ]
