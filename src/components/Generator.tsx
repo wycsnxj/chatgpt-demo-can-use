@@ -188,6 +188,20 @@ export default () => {
     }
   }
 
+  // Define a function to export the chat log as a txt file and download it
+  const exportChatLog = () => {
+    // Create a string to store the chat content
+    let chatContent = "";
+    // Loop through the message list and append each message to the chat content
+    messageList().forEach(message => {
+      chatContent += `${message.role}: ${message.content}\n`;
+    });
+    // Create a blob object from the chat content
+    const blob = new Blob([chatContent], { type: "text/plain;charset=utf-8" });
+    // Use the saveAs function from file-saver library to download the blob as a txt file
+    saveAs(blob, "chat-log.txt");
+  };
+
   const clear = () => {
     inputRef.value = ''
     inputRef.style.height = 'auto'
@@ -232,6 +246,7 @@ export default () => {
         currentSystemRoleSettings={currentSystemRoleSettings}
         setCurrentSystemRoleSettings={setCurrentSystemRoleSettings}
       />
+      {/* 遍历消息列表，渲染每条消息 */}
       <Index each={messageList()}>
         {(message, index) => (
           <MessageItem
@@ -242,13 +257,16 @@ export default () => {
           />
         )}
       </Index>
+      {/* 如果有当前的助理消息，就渲染它 */}
       {currentAssistantMessage() && (
       <MessageItem
         role="assistant"
         message={currentAssistantMessage}
       />
       )}
+      {/* 如果有当前的错误消息，就渲染它 */}
       { currentError() && <ErrorMessageItem data={currentError()} onRetry={retryLastFetch} /> }
+      {/* 根据加载状态，显示一个加载指示器或一个输入区域 */}
       <Show
         when={!loading()}
         fallback={() => (
@@ -258,6 +276,7 @@ export default () => {
           </div>
         )}
       >
+        {/* 显示一个输入区域，带有一个发送按钮和一个清除按钮 */}
         <div class="gen-text-wrapper" class:op-50={systemRoleEditing()}>
           <textarea
             ref={inputRef!}
@@ -279,8 +298,13 @@ export default () => {
           <button title="Clear" onClick={clear} disabled={systemRoleEditing()} gen-slate-btn>
             <IconClear />
           </button>
+          {/* 添加一个导出聊天记录的按钮 */}
+          <button title="Export" onClick={exportChatLog} disabled={systemRoleEditing()} gen-slate-btn>
+            Export
+          </button>
         </div>
       </Show>
+      {/* 显示一个固定在底部的按钮，可以让用户选择是否自动滚动到底部 */}
       <div class="fixed bottom-5 left-5 rounded-md hover:bg-slate/10 w-fit h-fit transition-colors active:scale-90" class:stick-btn-on={isStick()}>
         <div>
           <button class="p-2.5 text-base" title="stick to bottom" type="button" onClick={() => setStick(!isStick())}>
