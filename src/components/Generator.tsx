@@ -10,6 +10,7 @@ import { saveAs } from 'file-saver'
 import lodash from 'lodash'
 import axios from 'axios';
 
+
 // 定义一些常量
 const SCROLL_DELAY = 300 // 滚动延迟
 const PHOTOSPHERE_THICKNESS = 500 // 光球厚度
@@ -311,9 +312,9 @@ axios.get('https://api.github.com/users')
             <IconClear />
           </button>
           {/* 添加一个导出聊天记录的按钮 */}
-          <button title="Export" onClick={exportChatLog} disabled={systemRoleEditing()} gen-slate-btn>
+         {/* <button title="Export" onClick={exportChatLog} disabled={systemRoleEditing()} gen-slate-btn>
             Export
-          </button>
+          </button> */}
         </div>
       </Show>
       {/* 显示一个固定在底部的按钮，可以让用户选择是否自动滚动到底部 */}
