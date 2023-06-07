@@ -200,7 +200,7 @@ export default () => {
     // Create a blob object from the chat content
     const blob = new Blob([chatContent], { type: "text/plain;charset=utf-8" });
     // Use the saveAs function from file-saver library to download the blob as a txt file
-   // saveAs(blob, "chat-log.txt");
+    saveAs(blob, "chat-log.txt");
   };
 
   const clear = () => {
