@@ -200,7 +200,7 @@ export default () => {
     // Create a blob object from the chat content
     const blob = new Blob([chatContent], { type: "text/plain;charset=utf-8" });
     // Use the saveAs function from file-saver library to download the blob as a txt file
-    saveAs(blob, "chat-log.txt");
+   // saveAs(blob, "chat-log.txt");
   };
 
   const clear = () => {
@@ -300,9 +300,9 @@ export default () => {
             <IconClear />
           </button>
           {/* 添加一个导出聊天记录的按钮 */}
-          <button title="Export" onClick={exportChatLog} disabled={systemRoleEditing()} gen-slate-btn>
+         {/* <button title="Export" onClick={exportChatLog} disabled={systemRoleEditing()} gen-slate-btn>
             Export
-          </button>
+          </button> */}
         </div>
       </Show>
       {/* 显示一个固定在底部的按钮，可以让用户选择是否自动滚动到底部 */}
