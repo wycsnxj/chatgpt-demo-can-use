@@ -6,7 +6,9 @@ import MessageItem from './MessageItem'
 import SystemRoleSettings from './SystemRoleSettings'
 import ErrorMessageItem from './ErrorMessageItem'
 import type { ChatMessage, ErrorMessage } from '@/types'
-//import { saveAs } from "file-saver"
+import { saveAs } from 'file-saver'
+import lodash from 'lodash'
+import axios from 'axios';
 
 // 定义一些常量
 const SCROLL_DELAY = 300 // 滚动延迟
@@ -25,7 +27,16 @@ export default () => {
   const [isStick, setStick] = createSignal(false)
 
   createEffect(() => (isStick() && smoothToBottom()))
-
+// 使用axios发送一个GET请求
+axios.get('https://api.github.com/users')
+  .then(response => {
+    // 打印响应数据
+    console.log(response.data);
+  })
+  .catch(error => {
+    // 打印错误信息
+    console.error(error);
+  });
   onMount(() => {
     let lastPostion = window.scrollY
 
