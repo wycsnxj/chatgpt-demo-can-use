@@ -6,7 +6,7 @@ import MessageItem from './MessageItem'
 import SystemRoleSettings from './SystemRoleSettings'
 import ErrorMessageItem from './ErrorMessageItem'
 import type { ChatMessage, ErrorMessage } from '@/types'
-import { saveAs } from "file-saver"
+//import { saveAs } from "file-saver"
 
 // 定义一些常量
 const SCROLL_DELAY = 300 // 滚动延迟
@@ -200,7 +200,7 @@ export default () => {
     // Create a blob object from the chat content
     const blob = new Blob([chatContent], { type: "text/plain;charset=utf-8" });
     // Use the saveAs function from file-saver library to download the blob as a txt file
-    saveAs(blob, "chat-log.txt");
+   // saveAs(blob, "chat-log.txt");
   };
 
   const clear = () => {
